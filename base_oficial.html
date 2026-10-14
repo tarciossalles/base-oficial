@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BASE - Eleve o Padrão</title>
+  
+  <!-- Carregando React e ReactDOM da Nuvem -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- Babel para traduzir o código React no navegador -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Tailwind CSS para o Design -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Fontes Oficiais -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #111111;
+      color: #FFFFFF;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection {
+      background-color: #641F31;
+      color: #FFFFFF;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // --- ÍCONES (Substituindo a biblioteca Lucide para não depender de instalações) ---
+    const IconMenu = ({ size = 24, className = "" }) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg>;
+    const IconX = ({ size = 24, className = "" }) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
+    const IconArrowRight = ({ size = 24, className = "" }) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
+    const IconTarget = ({ size = 24, className = "" }) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>;
+    const IconSmartphone = ({ size = 24, className = "" }) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>;
+    const IconChevronLeft = ({ size = 24, className = "" }) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>;
+    const IconChevronRight = ({ size = 24, className = "" }) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>;
+    const IconChevronUp = ({ size = 24, className = "" }) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>;
+    const IconChevronDown = ({ size = 24, className = "" }) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>;
+
+    // --- COMPONENTES DA PÁGINA ---
+
+    const Navbar = ({ scrolled }) => {
+      const [isOpen, setIsOpen] = useState(false);
+      return (
+        <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-[#111111]/90 backdrop-blur-md border-b border-[#191919] py-4' : 'bg-transparent py-6'}`}>
+          <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <img src="white logo.png" alt="BASE" className="h-6 w-auto mix-blend-screen" onError={(e) => { e.target.style.display='none'; e.target.nextSibling.style.display='block'; }} />
+              <span style={{display: 'none'}} className="font-['Poppins'] font-bold text-2xl tracking-tighter text-[#FFFFFF]">BASE<span className="text-[#641F31]">.</span></span>
+            </div>
+            <div className="hidden md:flex items-center gap-8 text-sm font-medium tracking-widest text-[#A6A6A6]">
+              <a href="#metodo" className="hover:text-[#FFFFFF] transition-colors uppercase">Método</a>
+              <a href="#experiencia" className="hover:text-[#FFFFFF] transition-colors uppercase">Experiência</a>
+              <a href="#planos" className="hover:text-[#FFFFFF] transition-colors uppercase">Planos</a>
+              <a href="#planos" className="bg-[#641F31] hover:bg-[#451522] text-[#FFFFFF] px-6 py-2 rounded-sm transition-colors uppercase tracking-wider text-xs font-bold">Começar Agora</a>
+            </div>
+            <button className="md:hidden text-[#FFFFFF]" onClick={() => setIsOpen(!isOpen)}>
+              {isOpen ? <IconX size={24} /> : <IconMenu size={24} />}
+            </button>
+          </div>
+          {isOpen && (
+            <div className="md:hidden absolute top-full left-0 w-full bg-[#111111] border-b border-[#191919] py-4 px-6 flex flex-col gap-4 shadow-2xl">
+              <a href="#metodo" onClick={() => setIsOpen(false)} className="text-[#A6A6A6] text-sm uppercase tracking-widest">Método</a>
+              <a href="#experiencia" onClick={() => setIsOpen(false)} className="text-[#A6A6A6] text-sm uppercase tracking-widest">Experiência</a>
+              <a href="#planos" onClick={() => setIsOpen(false)} className="text-[#A6A6A6] text-sm uppercase tracking-widest">Planos</a>
+              <a href="#planos" onClick={() => setIsOpen(false)} className="bg-[#641F31] text-[#FFFFFF] px-6 py-3 rounded-sm uppercase tracking-wider text-xs font-bold mt-2 text-center">Começar Agora</a>
+            </div>
+          )}
+        </nav>
+      );
+    };
+
+    const Hero = () => (
+      <section className="relative min-h-screen flex items-center justify-center bg-[#111111] overflow-hidden pt-20">
+        <div className="absolute top-0 right-0 w-2/3 h-full opacity-20 pointer-events-none">
+          <img src="https://placehold.co/1200x1600/111111/451522?text=FOTOGRAFIA+EDITORIAL+ESPORTIVA" alt="Atleta" className="w-full h-full object-cover object-right" />
+          <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#111111]"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#111111] to-transparent"></div>
+        </div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-50 pointer-events-none"></div>
+        <div className="max-w-7xl mx-auto px-6 md:px-12 w-full relative z-10 grid md:grid-cols-12 gap-8 items-center">
+          <div className="md:col-span-8 lg:col-span-7 flex flex-col justify-center">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="w-8 h-[1px] bg-[#641F31]"></span>
+              <span className="text-[#A6A6A6] text-xs font-bold tracking-[0.2em] uppercase font-['Share_Tech_Mono']">Método Elite</span>
+            </div>
+            <h1 className="font-['Poppins'] text-5xl md:text-6xl lg:text-7xl font-extrabold text-[#FFFFFF] leading-[1.05] tracking-tight mb-6">
+              Sua rotina não vai ficar mais fácil.<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFFFFF] to-[#A6A6A6]">
+                Sua estratégia pode ser melhor.
+              </span>
+            </h1>
+            <p className="text-[#A6A6A6] text-lg md:text-xl font-['Poppins'] font-light max-w-2xl leading-relaxed mb-10">
+              Uma estrutura pensada para quem precisa evoluir sem depender de uma rotina perfeita. Entregamos previsibilidade tática e flexibilidade para você alcançar a alta performance na vida real.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              <a href="#planos" className="bg-[#FFFFFF] text-[#111111] hover:bg-[#F5F3F0] px-8 py-4 rounded-sm font-bold text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-2 group w-full sm:w-auto">
+                Conheça a Base <IconArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              </a>
+              <a href="#metodo" className="text-[#FFFFFF] border border-[#333333] hover:border-[#A6A6A6] px-8 py-4 rounded-sm font-medium text-sm tracking-widest uppercase transition-all flex items-center justify-center w-full sm:w-auto">
+                Como Funciona
+              </a>
+            </div>
+            <div className="mt-16 pt-8 border-t border-[#191919] flex flex-col sm:flex-row gap-2 sm:items-center justify-between opacity-60">
+              <p className="text-xs text-[#A6A6A6] font-['Share_Tech_Mono'] tracking-widest">VER. 2026 // ALTA PERFORMANCE</p>
+              <p className="text-xs text-[#A6A6A6] font-['Share_Tech_Mono'] tracking-widest">BASE — ELEVE O PADRÃO</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+
+    const ProblemSection = () => (
+      <section className="bg-[#F5F3F0] py-24 md:py-32 relative text-[#111111]">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 grid md:grid-cols-2 gap-16 items-center">
+          <div>
+            <h2 className="font-['Poppins'] text-4xl md:text-5xl font-bold leading-tight mb-8">
+              A vida real não segue um planejamento perfeito.
+            </h2>
+            <div className="space-y-6 text-[#191919] font-['Poppins'] text-lg">
+              <p>Reuniões de última hora, viagens não planejadas, responsabilidades familiares. A maioria dos métodos exige que sua vida pare para que eles funcionem.</p>
+              <p>Quando o método exige perfeição, o resultado inevitável é a frustração. O problema não é a sua falta de foco, é a fragilidade do sistema que você está tentando seguir.</p>
+            </div>
+          </div>
+          <div className="relative">
+            <div className="aspect-square bg-[#111111] p-8 md:p-12 relative flex flex-col justify-end">
+              <div className="absolute top-4 right-4 text-[#A6A6A6] font-['Share_Tech_Mono'] text-xs">DIAGNÓSTICO 01</div>
+              <div className="absolute bottom-4 right-4 w-4 h-4 border-r border-b border-[#641F31]"></div>
+              <div className="absolute top-4 left-4 w-4 h-4 border-l border-t border-[#641F31]"></div>
+              <h3 className="text-[#FFFFFF] font-['Poppins'] text-3xl font-bold mb-4">Menos improviso. Mais estrutura.</h3>
+              <p className="text-[#A6A6A6] font-['Poppins']">
+                Nossa proposta não é garantir que todos os dias serão fáceis. É construir uma base sólida o suficiente para suportar os dias em que nada dá certo.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+
+    const MethodSection = () => {
+      const steps = [
+        { num: '01', title: 'Diagnóstico', desc: 'Análise tática da sua rotina atual. Entendemos suas restrições, horários e pontos críticos antes de prescrever qualquer movimento.' },
+        { num: '02', title: 'Missão', desc: 'Definição clara de objetivos reais. Sem metas irreais, apenas marcos progressivos e alcançáveis baseados no seu contexto.' },
+        { num: '03', title: 'Execução', desc: 'Implementação do protocolo. Treinos otimizados, diretrizes claras e foco absoluto no que traz resultado com o menor desperdício de energia.' },
+        { num: '04', title: 'Resultado', desc: 'Monitoramento contínuo. Ajustes finos na rota baseados em dados, garantindo que a consistência vença a motivação temporária.' }
+      ];
+      return (
+        <section id="metodo" className="bg-[#111111] py-24 md:py-32 relative border-t border-[#191919]">
+          <div className="max-w-7xl mx-auto px-6 md:px-12">
+            <div className="mb-16">
+              <h2 className="font-['Poppins'] text-4xl md:text-5xl font-bold text-[#FFFFFF] mb-4">
+                Método <span className="text-[#641F31]">ELITE</span>
+              </h2>
+              <p className="text-[#A6A6A6] font-['Poppins'] text-lg max-w-2xl">
+                Quatro fases de implementação tática. Um sistema desenvolvido para máxima eficiência, independente do cenário.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
+              <div className="hidden lg:block absolute top-12 left-0 w-full h-[1px] bg-[#191919] z-0"></div>
+              {steps.map((step, index) => (
+                <div key={index} className="relative z-10 flex flex-col">
+                  <div className="text-[#641F31] font-['Share_Tech_Mono'] text-5xl font-bold mb-6 bg-[#111111] inline-block pr-4">{step.num}</div>
+                  <h4 className="text-[#FFFFFF] font-['Poppins'] text-xl font-bold mb-4">{step.title}</h4>
+                  <p className="text-[#A6A6A6] font-['Poppins'] leading-relaxed text-sm">{step.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    const PublicSection = () => (
+      <section className="bg-[#191919] py-24 border-y border-[#333333]">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 grid md:grid-cols-2 gap-12 items-center">
+          <div className="order-2 md:order-1 flex flex-col gap-4">
+            <div className="flex gap-6 bg-[#111111] p-6 md:p-8 rounded-sm border border-[#333333] hover:border-[#641F31] transition-colors">
+              <div className="text-[#641F31] font-['Share_Tech_Mono'] text-3xl font-bold leading-none">01</div>
+              <div>
+                <h3 className="text-[#FFFFFF] font-['Poppins'] font-bold tracking-wide mb-2 uppercase text-sm sm:text-base">Militares</h3>
+                <p className="text-[#A6A6A6] text-sm leading-relaxed font-['Poppins']">
+                  Forças Armadas, tais como pilotos da Força Aérea Brasileira, Infantes, Intendentes, bem como Bombeiros e Policiais Militares que precisam conciliar preparação física, carreira e rotina operacional.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-6 bg-[#111111] p-6 md:p-8 rounded-sm border border-[#333333] hover:border-[#641F31] transition-colors">
+              <div className="text-[#641F31] font-['Share_Tech_Mono'] text-3xl font-bold leading-none">02</div>
+              <div>
+                <h3 className="text-[#FFFFFF] font-['Poppins'] font-bold tracking-wide mb-2 uppercase text-sm sm:text-base">Profissionais de Alta Exigência</h3>
+                <p className="text-[#A6A6A6] text-sm leading-relaxed font-['Poppins']">
+                  Pessoas com agendas intensas e que precisam de uma estratégia eficiente, tais como médicos, advogados e plantonistas.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-6 bg-[#111111] p-6 md:p-8 rounded-sm border border-[#333333] hover:border-[#641F31] transition-colors">
+              <div className="text-[#641F31] font-['Share_Tech_Mono'] text-3xl font-bold leading-none">03</div>
+              <div>
+                <h3 className="text-[#FFFFFF] font-['Poppins'] font-bold tracking-wide mb-2 uppercase text-sm sm:text-base">Pessoas que Buscam Resultado</h3>
+                <p className="text-[#A6A6A6] text-sm leading-relaxed font-['Poppins']">
+                  Pessoas que querem uma direção estratégica, dispostas a treinar e executar, aceitando o processo para melhorar a estética e a saúde.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="order-1 md:order-2 lg:pl-12">
+            <h2 className="font-['Poppins'] text-3xl md:text-4xl lg:text-5xl font-bold text-[#FFFFFF] mb-6 leading-tight">
+              Para quem não tem o luxo do tempo livre.
+            </h2>
+            <p className="text-[#A6A6A6] font-['Poppins'] text-lg leading-relaxed">
+              Se você tem controle total sobre suas 24 horas, qualquer método funciona. A BASE foi desenhada para a realidade: imprevisível, exigente e implacável.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+
+    const DigitalExperience = () => (
+      <section id="experiencia" className="bg-[#111111] py-24 md:py-32">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 grid md:grid-cols-12 gap-12 items-center">
+          <div className="md:col-span-5">
+            <div className="flex items-center gap-3 mb-6">
+              <IconSmartphone className="text-[#641F31]" size={20} />
+              <span className="text-[#A6A6A6] text-xs font-bold tracking-[0.2em] uppercase font-['Share_Tech_Mono']">Ecossistema Digital</span>
+            </div>
+            <h2 className="font-['Poppins'] text-4xl md:text-5xl font-bold text-[#FFFFFF] mb-6">
+              Seu QG operacional.
+            </h2>
+            <p className="text-[#A6A6A6] font-['Poppins'] text-lg mb-8">
+              Toda a sua estratégia consolidada em um único ambiente. Treinos, progressão de cargas, metas diárias e comunicação direta com a equipe. Sem planilhas confusas, sem aplicativos fragmentados.
+            </p>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#641F31] mt-2"></div>
+                <p className="text-[#FFFFFF] text-sm font-medium font-['Poppins']">Acesso imediato ao planejamento da semana.</p>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#641F31] mt-2"></div>
+                <p className="text-[#FFFFFF] text-sm font-medium font-['Poppins']">Histórico de evolução e métricas de desempenho.</p>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#641F31] mt-2"></div>
+                <p className="text-[#FFFFFF] text-sm font-medium font-['Poppins']">Suporte tático integrado.</p>
+              </li>
+            </ul>
+          </div>
+          <div className="md:col-span-7 flex justify-center md:justify-end">
+            <div className="relative w-[280px] sm:w-[300px] h-[600px] bg-[#000000] rounded-[2.5rem] border-[8px] border-[#191919] shadow-2xl overflow-hidden ring-1 ring-white/5">
+              <div className="absolute top-0 inset-x-0 flex justify-center z-20 pointer-events-none">
+                <div className="w-32 h-7 bg-[#191919] rounded-b-3xl"></div>
+              </div>
+              <img src="IMG_8319.PNG" alt="Interface BASE" className="absolute inset-0 w-full h-full object-cover object-top z-10" />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+
+    const ResultsSection = () => {
+      const [currentIndex, setCurrentIndex] = useState(0);
+      const results = [
+        { id: "01", profile: "Plantonista / 34 anos", time: "6 Meses de Execução", description: "Redução de gordura corporal com manutenção de massa magra, mesmo com escalas de 24h consecutivas." },
+        { id: "02", profile: "Militar / 28 anos", time: "8 Meses de Execução", description: "Aumento expressivo de força e condicionamento cardiovascular para testes de aptidão física." },
+        { id: "03", profile: "Empresário / 41 anos", time: "12 Meses de Execução", description: "Reestruturação metabólica e ganho de massa consolidado, conciliando o método com viagens constantes e rotina imprevisível." }
+      ];
+      const nextSlide = () => setCurrentIndex((prev) => (prev === results.length - 1 ? 0 : prev + 1));
+      const prevSlide = () => setCurrentIndex((prev) => (prev === 0 ? results.length - 1 : prev - 1));
+
+      return (
+        <section className="bg-[#191919] py-24 md:py-32 border-t border-[#333333] overflow-hidden">
+          <div className="max-w-7xl mx-auto px-6 md:px-12">
+            <div className="mb-16 md:flex md:justify-between md:items-end">
+              <div className="max-w-2xl">
+                <div className="flex items-center gap-3 mb-4">
+                  <IconTarget className="text-[#641F31]" size={20} />
+                  <span className="text-[#A6A6A6] text-xs font-bold tracking-[0.2em] uppercase font-['Share_Tech_Mono']">Evolução Tática</span>
+                </div>
+                <h2 className="font-['Poppins'] text-4xl md:text-5xl font-bold text-[#FFFFFF] mb-6">A execução se materializa no corpo.</h2>
+                <p className="text-[#A6A6A6] font-['Poppins'] text-lg">Sem promessas mágicas ou edições. O que você vê aqui é o subproduto direto da aplicação disciplinada do Método ELITE na vida real.</p>
+              </div>
+              <div className="hidden md:flex items-center gap-6 pb-2">
+                <div className="text-[#A6A6A6] font-['Share_Tech_Mono'] tracking-widest text-sm">
+                  <span className="text-[#FFFFFF]">{String(currentIndex + 1).padStart(2, '0')}</span> // {String(results.length).padStart(2, '0')}
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={prevSlide} className="w-12 h-12 flex items-center justify-center border border-[#333333] text-[#FFFFFF] hover:bg-[#641F31] hover:border-[#641F31] transition-all"><IconChevronLeft size={20} /></button>
+                  <button onClick={nextSlide} className="w-12 h-12 flex items-center justify-center border border-[#333333] text-[#FFFFFF] hover:bg-[#641F31] hover:border-[#641F31] transition-all"><IconChevronRight size={20} /></button>
+                </div>
+              </div>
+            </div>
+            <div className="relative">
+              <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
+                {results.map((item, idx) => (
+                  <div key={idx} className="w-full flex-shrink-0 pr-0 md:pr-4">
+                    <div className="bg-[#111111] border border-[#333333] p-6 md:p-10 flex flex-col md:flex-row gap-8 md:gap-12 items-center group">
+                      <div className="w-full md:w-1/2 grid grid-cols-2 gap-2">
+                        <div className="relative aspect-[4/5] bg-[#191919] overflow-hidden">
+                          <div className="absolute top-3 left-3 z-10 bg-[#111111]/80 backdrop-blur-sm px-2 py-1 border border-[#333333]">
+                            <span className="text-[#A6A6A6] text-[10px] font-bold tracking-widest uppercase font-['Share_Tech_Mono']">Antes</span>
+                          </div>
+                          <img src={`https://placehold.co/600x750/111111/333333?text=ANTES+${item.id}`} alt="Antes" className="w-full h-full object-cover grayscale opacity-70 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-500" />
+                        </div>
+                        <div className="relative aspect-[4/5] bg-[#191919] overflow-hidden">
+                          <div className="absolute top-3 right-3 z-10 bg-[#641F31]/90 backdrop-blur-sm px-2 py-1">
+                            <span className="text-[#FFFFFF] text-[10px] font-bold tracking-widest uppercase font-['Share_Tech_Mono']">Depois</span>
+                          </div>
+                          <img src={`https://placehold.co/600x750/111111/641F31?text=DEPOIS+${item.id}`} alt="Depois" className="w-full h-full object-cover grayscale opacity-90 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-500" />
+                        </div>
+                      </div>
+                      <div className="w-full md:w-1/2 flex flex-col justify-center">
+                        <div className="inline-block bg-[#191919] border border-[#333333] px-4 py-2 mb-6 w-fit">
+                          <span className="text-[#A6A6A6] text-xs font-['Share_Tech_Mono'] tracking-widest uppercase">Relatório Operacional</span>
+                        </div>
+                        <div className="flex items-center gap-4 mb-4">
+                          <span className="text-[#641F31] font-['Share_Tech_Mono'] text-2xl font-bold">{item.id}</span>
+                          <h3 className="text-[#FFFFFF] font-['Poppins'] text-xl md:text-2xl font-bold uppercase">{item.profile}</h3>
+                        </div>
+                        <div className="text-[#FFFFFF] text-sm md:text-base font-['Share_Tech_Mono'] uppercase tracking-widest mb-6 pb-6 border-b border-[#333333]">
+                          Duração: <span className="text-[#641F31] font-bold">{item.time}</span>
+                        </div>
+                        <p className="text-[#A6A6A6] font-['Poppins'] text-base md:text-lg leading-relaxed">"{item.description}"</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex md:hidden items-center justify-between mt-8 border-t border-[#333333] pt-6">
+              <div className="text-[#A6A6A6] font-['Share_Tech_Mono'] tracking-widest text-sm">
+                <span className="text-[#FFFFFF]">{String(currentIndex + 1).padStart(2, '0')}</span> // {String(results.length).padStart(2, '0')}
+              </div>
+              <div className="flex gap-2">
+                <button onClick={prevSlide} className="w-12 h-12 flex items-center justify-center bg-[#111111] border border-[#333333] text-[#FFFFFF] active:bg-[#641F31] transition-all"><IconChevronLeft size={20} /></button>
+                <button onClick={nextSlide} className="w-12 h-12 flex items-center justify-center bg-[#111111] border border-[#333333] text-[#FFFFFF] active:bg-[#641F31] transition-all"><IconChevronRight size={20} /></button>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    const PlansSection = () => {
+      const plans = [
+        {
+          name: "Operação Starter", duration: "Trimestral", totalPrice: "750", installments: "3x R$ 250,00",
+          desc: "Entrada no Método ELITE. Acesso ao nosso App com acompanhamento pelo ELITE Coach e Nutricionista.",
+          features: ["Acesso ao App", "Call de início com o ELITE Coach", "1 avaliação de feedback", "Sem suporte via WhatsApp"],
+          tag: "BASE//3 meses", highlight: false
+        },
+        {
+          name: "Operação BASE", duration: "Semestral", totalPrice: "1.350", installments: "6x R$ 225,00",
+          desc: "Construção e consolidação do Método ELITE. Acesso ao nosso App com acompanhamento contínuo pelo ELITE Coach e Nutricionista.",
+          features: ["Acesso ao App", "Call com o ELITE Coach e Nutricionista", "Suporte via WhatsApp", "3 avaliações periódicas"],
+          tag: "BASE//6 meses", highlight: true
+        },
+        {
+          name: "Operação ELITE", duration: "Anual", totalPrice: "2.400", installments: "12x R$ 200,00",
+          desc: "Jornada completa no Método ELITE. Acesso ao App com acompanhamento estratégico pelo ELITE Coach e Nutricionista.",
+          features: ["Acesso ao App", "Call com o ELITE Coach e Nutricionista", "Suporte Via WhatsApp", "4 avaliações periódicas"],
+          tag: "BASE//12 meses", highlight: false
+        }
+      ];
+      return (
+        <section id="planos" className="bg-[#111111] py-24 md:py-32 border-t border-[#191919]">
+          <div className="max-w-7xl mx-auto px-6 md:px-12 text-center mb-16">
+            <h2 className="font-['Poppins'] text-4xl md:text-5xl font-bold text-[#FFFFFF] mb-4">Assuma o Controle</h2>
+            <p className="text-[#A6A6A6] font-['Poppins'] text-lg max-w-2xl mx-auto">Escolha o ciclo operacional adequado ao seu nível de exigência tática.</p>
+          </div>
+          <div className="max-w-7xl mx-auto px-6 lg:px-12 grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {plans.map((plan, index) => (
+              <div key={index} className={`flex flex-col relative p-8 transition-all duration-300 ${plan.highlight ? 'bg-[#191919] border-2 border-[#641F31] shadow-2xl transform lg:-translate-y-4' : 'bg-[#191919] border border-[#333333]'}`}>
+                {plan.highlight && <div className="absolute top-0 right-0 bg-[#641F31] text-[#FFFFFF] text-[10px] font-bold px-4 py-1.5 uppercase tracking-widest font-['Share_Tech_Mono']">Recomendado</div>}
+                <div className="mb-2"><span className="text-[#A6A6A6] text-xs font-bold tracking-[0.1em] uppercase font-['Share_Tech_Mono']">{plan.duration}</span></div>
+                <div className="mb-6">
+                  <h3 className="font-['Poppins'] text-2xl font-bold text-[#FFFFFF] mb-3">{plan.name}</h3>
+                  <p className="text-[#A6A6A6] text-sm font-['Poppins'] leading-relaxed min-h-[60px]">{plan.desc}</p>
+                </div>
+                <div className="mb-8 font-['Share_Tech_Mono'] pb-8 border-b border-[#333333]">
+                  <div className="flex items-baseline gap-1"><span className="text-[#A6A6A6] text-lg">R$</span><span className="text-4xl font-bold text-[#FFFFFF]">{plan.totalPrice}</span></div>
+                  <div className="text-[#641F31] text-sm mt-1">No cartão: {plan.installments} sem juros</div>
+                </div>
+                <ul className="space-y-5 mb-10 flex-grow font-['Poppins']">
+                  {plan.features.map((feature, idx) => (
+                    <li key={idx} className={`flex items-start gap-3 text-sm ${feature.includes('Sem suporte') ? 'text-[#666666]' : 'text-[#FFFFFF]'}`}>
+                      <div className={`w-1.5 h-1.5 rounded-none mt-1.5 flex-shrink-0 ${feature.includes('Sem suporte') ? 'bg-[#333333]' : 'bg-[#641F31]'}`}></div> 
+                      <span className="leading-snug">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-auto flex flex-col gap-4">
+                  <div className="text-right"><span className="text-[#333333] text-xs font-['Share_Tech_Mono']">{plan.tag}</span></div>
+                  <button className={`w-full py-4 font-bold uppercase tracking-widest text-xs transition-colors font-['Poppins'] ${plan.highlight ? 'bg-[#641F31] hover:bg-[#451522] text-[#FFFFFF]' : 'bg-[#FFFFFF] text-[#111111] hover:bg-[#F5F3F0]'}`}>Selecionar Operação</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    };
+
+    const FAQItem = ({ question, answer }) => {
+      const [isOpen, setIsOpen] = useState(false);
+      return (
+        <div className="border-b border-[#333333]">
+          <button className="w-full py-6 flex justify-between items-center text-left focus:outline-none" onClick={() => setIsOpen(!isOpen)}>
+            <span className="font-['Poppins'] font-semibold text-[#FFFFFF] pr-4">{question}</span>
+            {isOpen ? <IconChevronUp className="text-[#A6A6A6] flex-shrink-0" size={20} /> : <IconChevronDown className="text-[#A6A6A6] flex-shrink-0" size={20} />}
+          </button>
+          <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96 pb-6' : 'max-h-0'}`}>
+            <p className="text-[#A6A6A6] font-['Poppins'] text-sm leading-relaxed">{answer}</p>
+          </div>
+        </div>
+      );
+    };
+
+    const FAQSection = () => {
+      const faqs = [
+        { q: "O que é a BASE?", a: "A BASE é uma estrutura de rotina baseada no Método ELITE, criada para pessoas que precisam conciliar performance, treinamento e evolução com uma rotina intensa e real." },
+        { q: "A BASE é uma consultoria online?", a: "A BASE oferece uma experiência estruturada de rotina, para conciliar treinamento e alimentação dentro do Método ELITE. O foco não é simplesmente entregar um treino e dieta, mas construir uma estratégia que possa ser executada e sustentada na sua rotina, independentemente das dificuldades." },
+        { q: "A BASE é exclusiva para militares?", a: "Não. A BASE nasceu fortemente influenciada pela cultura de disciplina, preparação e prontidão do ambiente militar, mas foi desenvolvida para qualquer pessoa que viva uma rotina intensa e esteja disposta a elevar seu padrão de execução na vida real." },
+        { q: "Preciso treinar em academia?", a: "Sim. A metodologia é rigorosamente estruturada considerando acesso a uma academia e equipamentos adequados para garantir o padrão de execução do planejamento." },
+        { q: "Como funciona depois que entro na BASE?", a: "Você começa pelo Diagnóstico BASE, que estabelece seu ponto de partida através de uma avaliação completa. A partir desse ponto, é estruturada sua estratégia dentro do Método ELITE. O processo é acompanhado por ciclos, com execução, análise e ajustes conforme sua evolução, tudo de forma digital através do nosso aplicativo próprio." },
+        { q: "O planejamento é personalizado?", a: "Sim. O planejamento considera seu objetivo, nível atual, rotina, disponibilidade, experiência, limitações e capacidade de execução. A proposta não é encaixar você em um modelo pronto, mas construir uma estratégia tática 100% compatível com sua realidade." },
+        { q: "Quanto tempo terei resultados?", a: "O Método ELITE fornece estrutura, planejamento e acompanhamento para direcionar sua evolução de forma clínica e tática. O resultado depende diretamente da sua execução individual, da consistência e de fatores fora do nosso controle. Por isso, não trabalhamos com promessas vazias de resultados garantidos, mas com um processo sólido estruturado para maximizar a qualidade da sua execução e, consequentemente, os resultados." }
+      ];
+      return (
+        <section className="bg-[#111111] py-24 md:py-32 border-t border-[#191919]">
+          <div className="max-w-3xl mx-auto px-6 md:px-12">
+            <h2 className="font-['Poppins'] text-3xl font-bold text-[#FFFFFF] mb-12 text-center">Dúvidas Frequentes</h2>
+            <div>{faqs.map((faq, idx) => <FAQItem key={idx} question={faq.q} answer={faq.a} />)}</div>
+          </div>
+        </section>
+      );
+    };
+
+    const Footer = () => (
+      <>
+        <section className="bg-[#0a0a0a] py-32 relative overflow-hidden border-t border-[#191919]">
+          <div className="absolute inset-0 flex items-center justify-center opacity-5">
+            <span className="text-[20vw] font-['Poppins'] font-black text-[#FFFFFF] tracking-tighter select-none">BASE</span>
+          </div>
+          <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
+            <h2 className="font-['Poppins'] text-5xl md:text-6xl font-bold text-[#FFFFFF] mb-8">Eleve o Padrão.</h2>
+            <p className="text-[#A6A6A6] text-lg mb-12 font-['Poppins']">A decisão de abandonar a mediocridade é o primeiro passo. A estrutura para mantê-la é responsabilidade nossa.</p>
+            <a href="#planos" className="bg-[#FFFFFF] text-[#111111] hover:bg-[#F5F3F0] px-10 py-5 rounded-sm font-bold text-sm tracking-widest uppercase transition-all shadow-xl hover:shadow-2xl font-['Poppins'] inline-block">Iniciar Agora</a>
+          </div>
+        </section>
+        <footer className="bg-[#111111] pt-16 pb-8 border-t border-[#191919]">
+          <div className="max-w-7xl mx-auto px-6 md:px-12">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
+              <img src="white logo.png" alt="BASE" className="h-10 w-auto mix-blend-screen" onError={(e) => e.target.style.display='none'} />
+              <div className="flex gap-6 text-sm font-medium tracking-widest text-[#A6A6A6]">
+                <a href="#" className="hover:text-[#FFFFFF] uppercase font-['Poppins']">Instagram</a>
+                <a href="#" className="hover:text-[#FFFFFF] uppercase font-['Poppins']">Contato</a>
+              </div>
+            </div>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#666666] font-['Share_Tech_Mono'] border-t border-[#191919] pt-8">
+              <p>© {new Date().getFullYear()} BASE. Todos os direitos reservados.</p>
+            </div>
+          </div>
+        </footer>
+      </>
+    );
+
+    const App = () => {
+      const [scrolled, setScrolled] = useState(false);
+      useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 50);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+      }, []);
+      return (
+        <div className="min-h-screen">
+          <Navbar scrolled={scrolled} />
+          <main>
+            <Hero />
+            <ProblemSection />
+            <MethodSection />
+            <PublicSection />
+            <DigitalExperience />
+            <ResultsSection />
+            <PlansSection />
+            <FAQSection />
+          </main>
+          <Footer />
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
